@@ -19,7 +19,7 @@ afterEvaluate {
 
                 // You can then customize attributes of the publication as shown below.
                 groupId = commonGroupId
-                artifactId = '$commonArtifactId'
+                artifactId = commonArtifactId
                 version = commonVersionName
             }
             // Creates a Maven publication called “debug”.
@@ -28,7 +28,7 @@ afterEvaluate {
                 from components.debug
 
                 groupId = commonGroupId
-                artifactId = '$commonArtifactId-debug'
+                artifactId = commonArtifactId + '-debug'
                 version = commonVersionName
             }
         }

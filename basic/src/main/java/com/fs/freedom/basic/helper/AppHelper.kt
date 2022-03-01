@@ -1,18 +1,29 @@
 package com.fs.freedom.basic.helper
 
 import android.app.Activity
+import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
 import android.net.Uri
+import android.os.*
 import android.provider.Settings
 import com.fs.freedom.basic.constant.CommonConstant
 import com.fs.freedom.basic.util.LogUtil
-import java.lang.RuntimeException
+import kotlin.RuntimeException
+
+import android.os.Build
+
+import android.os.Vibrator
+import com.fs.freedom.basic.listener.SystemRingtoneListener
+
 
 /**
  * App 帮助类
  */
 object AppHelper {
+
+    private val mHandler = Handler(Looper.getMainLooper())
 
     /**
      * 进入当前应用-设置-详情页面
@@ -35,7 +46,7 @@ object AppHelper {
     /**
      * 获取应用版本号
      */
-    fun getAppVersion(context: Context?) : String {
+    fun getAppVersion(context: Context?): String {
         if (context == null) {
             return CommonConstant.UNKNOWN
         }
@@ -46,6 +57,20 @@ object AppHelper {
                 e.printStackTrace()
             }
             CommonConstant.UNKNOWN
+        }
+    }
+
+    fun checkIsInMainThread() : Boolean {
+        return Thread.currentThread() == Looper.getMainLooper().thread
+    }
+
+    fun runOnUiThread(function: () -> Unit) {
+        if (!checkIsInMainThread()) {
+            mHandler.post {
+                function()
+            }
+        } else {
+            function()
         }
     }
 

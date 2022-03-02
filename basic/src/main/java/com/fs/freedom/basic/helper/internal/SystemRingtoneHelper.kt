@@ -6,6 +6,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import com.fs.freedom.basic.expand.smartLog
 import com.fs.freedom.basic.helper.AppHelper
+import com.fs.freedom.basic.helper.FileHelper
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.util.LogUtil
 
@@ -108,9 +109,8 @@ internal object SystemRingtoneHelper {
             if (cursor.moveToFirst()) {
                 while (cursor.moveToNext()) {
                     val ringtoneTitle = manager.getRingtone(cursor.position).getTitle(context)
-                    val ringtonePath = manager.getRingtoneUri(cursor.position)
-
-                    titleAndPathMap[ringtoneTitle] = ringtonePath
+                    val ringtoneUri = manager.getRingtoneUri(cursor.position)
+                    titleAndPathMap[ringtoneTitle] = ringtoneUri
                 }
             }
             cursor.close()

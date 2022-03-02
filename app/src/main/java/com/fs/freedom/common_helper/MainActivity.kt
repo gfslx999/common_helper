@@ -12,6 +12,7 @@ import com.fs.freedom.basic.helper.SystemHelper
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.util.LogUtil
 import com.fs.freedom.basic.util.ToastUtil
+import com.google.gson.Gson
 import kotlin.random.Random
 
 
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
                 commonResultListener = object : CommonResultListener {
                     override fun onSuccess(result: Map<String, Uri>) {
                         LogUtil.logI(result.keys)
+                        Gson()
                         val index = Random.nextInt(from = 0, until = result.size)
                         val values = result.values.toList()
                         val uri = values[index]

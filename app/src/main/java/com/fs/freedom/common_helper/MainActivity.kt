@@ -1,13 +1,16 @@
 package com.fs.freedom.common_helper
 
-import android.media.Ringtone
+import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.fs.freedom.basic.BasicInitial
+import com.fs.freedom.basic.helper.MediaHelper
 import com.fs.freedom.basic.helper.SystemHelper
-import com.fs.freedom.basic.listener.SystemRingtoneListener
+import com.fs.freedom.basic.listener.CommonResultListener
+import com.fs.freedom.basic.util.LogUtil
 import com.fs.freedom.basic.util.ToastUtil
 import kotlin.random.Random
 
@@ -17,25 +20,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        BasicInitial.initial(isCanLogInBasicModel = true)
-
         val btnFirst = findViewById<Button>(R.id.btn_first)
         val btnSecond = findViewById<Button>(R.id.btn_second)
 
-        var ringtone: Ringtone? = null
         btnFirst.setOnClickListener {
-            ringtone?.stop()
-        }
-        btnSecond.setOnClickListener {
-            SystemHelper.getSystemRingtoneMap(
+            MediaHelper.getSystemRingtoneMap(
                 this,
-                systemRingtoneListener = object : SystemRingtoneListener {
-                    override fun onSuccess(map: Map<String, Uri>) {
-                        val index = Random.nextInt(from = 0, until = map.size)
-                        val values = map.values.toList()
+                ringtoneType = RingtoneManager.TYPE_NOTIFICATION,
+                commonResultListener = object : CommonResultListener {
+                    override fun onSuccess(result: Map<String, Uri>) {
+                        LogUtil.logI(result.keys)
+                        val index = Random.nextInt(from = 0, until = result.size)
+                        val values = result.values.toList()
                         val uri = values[index]
-                        ringtone =
-                            SystemHelper.playSystemRingtone(this@MainActivity, assignUri = uri)
+                        MediaHelper.playSystemRingtone(this@MainActivity, assignUri = uri)
                     }
 
                     override fun onError(message: String) {
@@ -43,7 +41,9 @@ class MainActivity : AppCompatActivity() {
                         ToastUtil.showToast(this@MainActivity, message)
                     }
                 })
-
+        }
+        btnSecond.setOnClickListener {
+            SystemHelper.callPhoneToShake(this, amplitude = 255)
         }
 
     }

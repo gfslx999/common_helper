@@ -2,13 +2,16 @@ package com.fs.freedom.basic.listener
 
 import android.net.Uri
 
-interface SystemRingtoneListener {
+/**
+ * 获取系统铃声列表回调
+ */
+interface CommonResultListener {
 
     fun onLoading() {}
 
     fun onHideLoading() {}
 
-    fun onSuccess(map: Map<String, Uri>)
+    fun onSuccess(result: Map<String, Uri>)
 
     fun onEmpty() {}
 

@@ -1,21 +1,14 @@
 package com.fs.freedom.basic.helper
 
 import android.app.Activity
-import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import com.fs.freedom.basic.constant.CommonConstant
 import com.fs.freedom.basic.util.LogUtil
 import kotlin.RuntimeException
-
-import android.os.Build
-
-import android.os.Vibrator
-import com.fs.freedom.basic.listener.SystemRingtoneListener
 
 
 /**
@@ -60,10 +53,16 @@ object AppHelper {
         }
     }
 
+    /**
+     * 检测当前是否在主线程
+     */
     fun checkIsInMainThread() : Boolean {
         return Thread.currentThread() == Looper.getMainLooper().thread
     }
 
+    /**
+     * 切换到主线程
+     */
     fun runOnUiThread(function: () -> Unit) {
         if (!checkIsInMainThread()) {
             mHandler.post {

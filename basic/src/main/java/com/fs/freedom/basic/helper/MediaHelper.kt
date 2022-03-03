@@ -30,7 +30,7 @@ object MediaHelper {
     }
 
     /**
-     * 停止已播放的系统铃声
+     * 停止正在播放的系统铃声
      *
      * 该方法通过类内部维护Ringtone对象，来实现停止功能
      */
@@ -54,7 +54,7 @@ object MediaHelper {
     fun getSystemRingtoneMap(
         context: Context?,
         ringtoneType: Int,
-        commonResultListener: CommonResultListener
+        commonResultListener: CommonResultListener<String>
     ){
         SystemRingtoneHelper.getSystemRingtoneMap(context, ringtoneType, commonResultListener)
     }

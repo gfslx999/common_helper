@@ -43,6 +43,6 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.9.0'
 //    implementation 'com.github.gfslx999.common_helper:gao:v.0.1'
-    implementation 'com.github.gfslx999.common_helper:gao-debug:v.0.1'
-//    implementation project(path: ':basic')
+//    implementation 'com.github.gfslx999.common_helper:gao-debug:v.0.1'
+    implementation project(path: ':basic')
 }

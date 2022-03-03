@@ -35,9 +35,9 @@ internal object SystemRingtoneHelper {
             LogUtil.logI("playSystemRingtone: Play failed, context is null!")
             return false
         }
-        if (isRingtonePlaying) {
-            stopSystemRingtone()
-        }
+        //防止上一个还没有播放完毕
+        stopSystemRingtone()
+
         return try {
             mRingtone = RingtoneManager.getRingtone(
                 context,
@@ -79,7 +79,7 @@ internal object SystemRingtoneHelper {
     fun getSystemRingtoneMap(
         context: Context?,
         ringtoneType: Int,
-        commonResultListener: CommonResultListener,
+        commonResultListener: CommonResultListener<String>,
     ){
         if (context == null) {
             commonResultListener.onError("Context is null!")
@@ -142,7 +142,7 @@ internal object SystemRingtoneHelper {
      */
     private fun handleRingtoneResult(
         titleAndPathMap: MutableMap<String, Uri>,
-        commonResultListener: CommonResultListener,
+        commonResultListener: CommonResultListener<String>,
         isInMainThreadOriginal: Boolean) {
         //检测之前是否位于主线程
         if (isInMainThreadOriginal) {

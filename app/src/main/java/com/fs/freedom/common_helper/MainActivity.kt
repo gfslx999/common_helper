@@ -1,19 +1,13 @@
 package com.fs.freedom.common_helper
 
-import android.media.RingtoneManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.fs.freedom.basic.helper.MediaHelper
+import com.fs.freedom.basic.helper.DownloadHelper
 import com.fs.freedom.basic.helper.SystemHelper
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.util.LogUtil
-import com.fs.freedom.basic.util.ToastUtil
-import com.google.gson.Gson
-import kotlin.random.Random
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,24 +19,24 @@ class MainActivity : AppCompatActivity() {
         val btnSecond = findViewById<Button>(R.id.btn_second)
 
         btnFirst.setOnClickListener {
-            MediaHelper.getSystemRingtoneMap(
-                this,
-                ringtoneType = RingtoneManager.TYPE_NOTIFICATION,
-                commonResultListener = object : CommonResultListener {
-                    override fun onSuccess(result: Map<String, Uri>) {
-                        LogUtil.logI(result.keys)
-                        Gson()
-                        val index = Random.nextInt(from = 0, until = result.size)
-                        val values = result.values.toList()
-                        val uri = values[index]
-                        MediaHelper.playSystemRingtone(this@MainActivity, assignUri = uri)
+            DownloadHelper.downloadFile(
+                "https://hipos.oss-cn-shanghai.aliyuncs.com/hipos-kds-v.5.10.031-g.apk",
+                "${filesDir.path}/updateApk/",
+                "newApk.apk",
+                commonResultListener = object : CommonResultListener<File> {
+                    override fun onSuccess(result: File) {
+                        SystemHelper.installApk(this@MainActivity, result)
                     }
 
                     override fun onError(message: String) {
-                        super.onError(message)
-                        ToastUtil.showToast(this@MainActivity, message)
+                        LogUtil.logI("message: $message")
                     }
-                })
+
+                    override fun onProgress(currentProgress: Float) {
+                        LogUtil.logI("currentProgress: $currentProgress")
+                    }
+                }
+            )
         }
         btnSecond.setOnClickListener {
             SystemHelper.callPhoneToShake(this, amplitude = 255)

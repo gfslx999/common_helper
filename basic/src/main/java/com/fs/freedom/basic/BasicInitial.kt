@@ -10,6 +10,9 @@ class BasicInitial {
     companion object {
         /**
          * 初始化 basic
+         *
+         * [isCanLogInBasicModel] 是否允许打印，
+         * 如为false，则basic中所有的异常信息和您在项目中通过LogUtil的打印都将不打印
          */
         fun initial(
             applicationContext: Application,

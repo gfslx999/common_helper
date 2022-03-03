@@ -1,6 +1,27 @@
 # CommonHelper
 
-## 简单使用
+## 引入
+
+#### 如果你Gradle Version < 7.0, 在 build.gradle内
+```kotlin
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+```
+
+#### 如果你Gradle Version >= 7.0, 在 settings.gradle内
+```kotlin
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+```
+
+#### 在app/build.gradle
+```kotlin
+    implementation 'com.github.gfslx999.common_helper:gao:v.0.11'
+```
+
+### 初始化
 
 ```kotlin
     /**

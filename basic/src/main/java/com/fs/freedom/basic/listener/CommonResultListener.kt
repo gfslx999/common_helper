@@ -3,10 +3,9 @@ package com.fs.freedom.basic.listener
 import android.net.Uri
 
 /**
- * 获取系统铃声列表回调
+ * 通用结果回调
  */
 interface CommonResultListener <T> {
-
     //正在加载
     fun onLoading() {}
 
@@ -30,5 +29,4 @@ interface CommonResultListener <T> {
 
     //加载失败
     fun onError(message: String) {}
-
 }

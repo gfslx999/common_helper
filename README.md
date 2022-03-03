@@ -9,8 +9,7 @@
      * [isCanLogInBasicModel] 是否允许打印，
      * 如为false，则basic中所有的异常信息和您在项目中通过LogUtil的打印都将不打印
      */
-    BasicInitial.initial(applicationContext);
-
+    BasicInitial.initial(applicationContext, isCanLogInBasicModel = true)
 ```
 
 ## API 说明
@@ -22,7 +21,6 @@
  * 获取系统铃声列表回调
  */
 interface CommonResultListener <T> {
-
     //正在加载
     fun onLoading() {}
 
@@ -46,14 +44,12 @@ interface CommonResultListener <T> {
 
     //加载失败
     fun onError(message: String) {}
-
 }
 ```
 
 #### SystemHelper
 
 ```kotlin
-    
     /**
      * 获取设备的品牌信息和型号
      */
@@ -87,7 +83,6 @@ interface CommonResultListener <T> {
 #### DownloadHelper
 
 ```kotlin
-
     /**
      * 下载文件
      *
@@ -158,8 +153,6 @@ interface CommonResultListener <T> {
 ##### AppHelper
 
 ```kotlin
-private val mHandler = Handler(Looper.getMainLooper())
-
     /**
      * 进入当前应用-设置-详情页面
      */

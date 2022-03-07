@@ -20,10 +20,13 @@ import com.fs.freedom.basic.util.LogUtil
 import com.permissionx.guolindev.PermissionX
 import com.permissionx.guolindev.callback.RequestCallback
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.lang.RuntimeException
 import kotlin.Exception
 
-object SystemHelper {
+object SystemHelper : Activity() {
+
+    private const val REQUEST_CODE_INSTALL_PACKAGE = 1
 
     /**
      * 获取设备的品牌信息和型号
@@ -80,12 +83,16 @@ object SystemHelper {
      */
     @SuppressLint("QueryPermissionsNeeded")
     fun installApk(
-        activity: FragmentActivity,
+        activity: FragmentActivity?,
         apkFile: File?,
         explainContent: String = "您必须同意 '应用内安装其他应用' 权限才能完成升级",
         positiveText: String = "确认",
         negativeText: String = "取消",
     ) {
+        if (activity == null) {
+            LogUtil.logI("installApk: activity is null!")
+            return
+        }
         if (apkFile == null || !apkFile.exists()) {
             LogUtil.logI("installApk: install failed, apk file == null or it's not exists")
             return
@@ -128,6 +135,58 @@ object SystemHelper {
         }
     }
 
+    /**
+     * 安装apk，此方法适用于无法获取Fragment/FragmentActivity情况
+     *
+     * 使用此功能需要在清单文件中配置 FileProvider
+     */
+    @SuppressLint("QueryPermissionsNeeded")
+    fun installApkCommon(
+        activity: Activity?,
+        apkFile: File?,
+    ) {
+        if (activity == null) {
+            LogUtil.logI("installApk: activity is null!")
+            return
+        }
+        if (apkFile == null || !apkFile.exists()) {
+            LogUtil.logI("installApk: install failed, apk file == null or it's not exists")
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            //检测当前机型是否支持跳转到 设置详情页，如不支持，则直接进行安装
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                intent.data = Uri.parse("package:${activity.packageName}")
+                val resolveActivity = intent.resolveActivity(activity.packageManager)
+                if (resolveActivity == null) {
+                    toInstallApk(activity, apkFile)
+                    return
+                }
+            } catch (e: RuntimeException) {
+                smartLog { e.printStackTrace() }
+                toInstallApk(activity, apkFile)
+                return
+            }
+            val isGranted = activity.packageManager.canRequestPackageInstalls()
+
+            if (!isGranted) {
+                try {
+                    val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                    intent.data = Uri.parse("package:${activity.packageName}")
+                    activity.startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    smartLog { e.printStackTrace() }
+                    toInstallApk(activity, apkFile)
+                }
+            } else {
+                toInstallApk(activity, apkFile)
+            }
+        } else {
+            toInstallApk(activity, apkFile)
+        }
+    }
+
     @SuppressLint("SetWorldReadable", "SetWorldWritable")
     private fun toInstallApk(activity: Activity, apkFile: File) {
         try {
@@ -153,6 +212,8 @@ object SystemHelper {
             intent.setDataAndType(uri, "application/vnd.android.package-archive")
             activity.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
+            smartLog { e.printStackTrace() }
+        } catch (e: IllegalArgumentException) {
             smartLog { e.printStackTrace() }
         }
     }

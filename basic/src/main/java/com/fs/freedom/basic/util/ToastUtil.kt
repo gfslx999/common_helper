@@ -10,6 +10,9 @@ object ToastUtil {
 
     private var mToast: Toast? = null
 
+    /**
+     * 弹出吐司提示
+     */
     fun showToast(
         context: Context?,
         msg: Any?,
@@ -18,16 +21,14 @@ object ToastUtil {
             return
         }
 
-        // 防止出现重复显示
-        mToast = if (mToast == null) {
-            Toast.makeText(context, "$msg", duration)
-        } else {
-            mToast?.cancel()
-            Toast.makeText(context, "$msg", duration)
-        }
-        mToast?.show()
+        mToast?.cancel()
+        mToast = Toast.makeText(context, "$msg", duration)
+        mToast!!.show()
     }
 
+    /**
+     * 隐藏吐司提示
+     */
     fun hideToast() {
         mToast?.cancel()
     }

@@ -19,28 +19,34 @@ class MainActivity : AppCompatActivity() {
         val btnSecond = findViewById<Button>(R.id.btn_second)
 
         btnFirst.setOnClickListener {
-            DownloadHelper.downloadFile(
-                "https://hipos.oss-cn-shanghai.aliyuncs.com/hipos-kds-v.5.10.031-g.apk",
-                "${filesDir.path}/updateApk/",
-                "newApk.apk",
-                commonResultListener = object : CommonResultListener<File> {
-                    override fun onSuccess(result: File) {
-                        SystemHelper.installApk(this@MainActivity, result)
-                    }
-
-                    override fun onError(message: String) {
-                        LogUtil.logI("message: $message")
-                    }
-
-                    override fun onProgress(currentProgress: Float) {
-                        LogUtil.logI("currentProgress: $currentProgress")
-                    }
-                }
-            )
+            testDownloadFile()
         }
         btnSecond.setOnClickListener {
             SystemHelper.callPhoneToShake(this, amplitude = 255)
         }
 
     }
+
+    private fun testDownloadFile() {
+        DownloadHelper.downloadFile(
+            "https://hipos.oss-cn-shanghai.aliyuncs.com/hipos-kds-v.5.10.031-g.apk",
+            "${filesDir.path}/updateApk/",
+            "newApk.apk",
+            commonResultListener = object : CommonResultListener<File> {
+                override fun onSuccess(result: File) {
+                    LogUtil.logI("onSuccess")
+                    SystemHelper.installApkCommon(this@MainActivity, result)
+                }
+
+                override fun onError(message: String) {
+                    LogUtil.logI("message: $message")
+                }
+
+                override fun onProgress(currentProgress: Float) {
+//                    LogUtil.logI("currentProgress: $currentProgress")
+                }
+            }
+        )
+    }
+
 }

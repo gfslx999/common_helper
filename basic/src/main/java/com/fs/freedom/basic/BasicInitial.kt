@@ -15,10 +15,12 @@ class BasicInitial {
          * 如为false，则basic中所有的异常信息和您在项目中通过LogUtil的打印都将不打印
          */
         fun initial(
-            applicationContext: Application,
+            applicationContext: Application? = null,
             isCanLogInBasicModel: Boolean = true
         ) {
-            OkGo.getInstance().init(applicationContext)
+            if (applicationContext != null) {
+                OkGo.getInstance().init(applicationContext)
+            }
             LogUtil.isCanLog = isCanLogInBasicModel
         }
     }

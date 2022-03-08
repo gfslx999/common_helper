@@ -29,14 +29,15 @@ class MainActivity : AppCompatActivity() {
             MediaHelper.playSystemRingtone(this, assignUri)
         }
         btnSecond.setOnClickListener {
-            MediaHelper.getSystemRingtoneList(this, RingtoneManager.TYPE_RINGTONE, object : CommonResultListener<SystemRingtoneModel> {
-                override fun onSuccess(result: List<SystemRingtoneModel>) {
-                    val index = Random.nextInt(0, result.size - 1)
-                    assignUri = Uri.parse(result[index].ringtoneUri)
-                    val jsonList = Gson().toJson(result)
-                    LogUtil.logI("onSuccess jsonList: $jsonList")
-                }
-            })
+            testDownloadFile()
+//            MediaHelper.getSystemRingtoneList(this, RingtoneManager.TYPE_RINGTONE, object : CommonResultListener<SystemRingtoneModel> {
+//                override fun onSuccess(result: List<SystemRingtoneModel>) {
+//                    val index = Random.nextInt(0, result.size - 1)
+//                    assignUri = Uri.parse(result[index].ringtoneUri)
+//                    val jsonList = Gson().toJson(result)
+//                    LogUtil.logI("onSuccess jsonList: $jsonList")
+//                }
+//            })
         }
 
     }

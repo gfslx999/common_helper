@@ -113,13 +113,30 @@ object SystemHelper : Activity() {
             if (resolveActivity != null) {
                 val isHasPermission = activity.packageManager?.canRequestPackageInstalls() ?: false
                 if (!isHasPermission) {
-                    commonResultListener.onError(OPEN_INSTALL_PACKAGE_PERMISSION)
-                    intoManageUnknownAppPage(
-                        activity,
-                        explainContent = explainContent,
-                        positiveText = positiveText,
-                        negativeText = negativeText
-                    )
+                    //如果为 FragmentActivity 可直接通过三方库来完成；
+                    //如果不是，则需要自己在Activity中根据 onError 回调值是否为[OPEN_INSTALL_PACKAGE_PERMISSION]，
+                    //在onResume中再次调用此方法
+                    if (activity is FragmentActivity) {
+                        PermissionX.init(activity).permissions(Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                            .onExplainRequestReason { scope, deniedlist ->
+                                scope.showRequestReasonDialog(
+                                    deniedlist, explainContent, positiveText, negativeText)
+                            }.request { allGranted, _, _ ->
+                                if (!allGranted) {
+                                    return@request
+                                }
+                                //如同意权限了，再次调用此方法，达到继续刚才方法执行的目的
+                                downloadAndInstallApk(activity, fileUrl, filePath, fileName, isDeleteOriginalFile, explainContent, positiveText, negativeText, commonResultListener)
+                            }
+                    } else {
+                        commonResultListener.onError(OPEN_INSTALL_PACKAGE_PERMISSION)
+                        intoManageUnknownAppPage(
+                            activity,
+                            explainContent = explainContent,
+                            positiveText = positiveText,
+                            negativeText = negativeText
+                        )
+                    }
                     return
                 }
             }

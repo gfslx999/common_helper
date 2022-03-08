@@ -34,6 +34,9 @@ object SystemHelper : Activity() {
 
     //安装apk前进入 '允许安装其他应用' 时调用
     const val OPEN_INSTALL_PACKAGE_PERMISSION = "OPEN_INSTALL_PACKAGE_PERMISSION"
+    //安装apk权限时版本判断条件
+    private val installApkJudgeRule: Boolean
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT < Build.VERSION_CODES.R
 
     /**
      * 获取设备的品牌信息和型号
@@ -103,7 +106,7 @@ object SystemHelper : Activity() {
             return
         }
         commonResultListener.onStart()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (installApkJudgeRule) {
             val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
             intent.data = Uri.parse("package:${activity.packageName}")
             val resolveActivity = intent.resolveActivity(activity.packageManager)
@@ -166,7 +169,7 @@ object SystemHelper : Activity() {
             return
         }
         commonResultListener?.onStart()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (installApkJudgeRule) {
             //检测当前机型是否支持跳转到 设置详情页，如不支持，则直接进行安装
             try {
                 val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
@@ -216,6 +219,10 @@ object SystemHelper : Activity() {
     }
 
     /**
+     * ========================== PrivateApi ==========================
+     */
+
+    /**
      * 弹出弹窗提示，确认后，进入管理 '允许安装其他应用' 权限界面
      */
     @RequiresApi(Build.VERSION_CODES.O)
@@ -256,10 +263,6 @@ object SystemHelper : Activity() {
             defaultDialog.dismiss()
         }
     }
-
-    /**
-     * ========================== PrivateApi ==========================
-     */
 
     /**
      * 进入系统安装应用界面

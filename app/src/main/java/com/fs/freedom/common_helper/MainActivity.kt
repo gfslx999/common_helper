@@ -28,25 +28,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun testDownloadFile() {
-        DownloadHelper.downloadFile(
+        SystemHelper.downloadAndInstallApk(
+            this,
             "https://hipos.oss-cn-shanghai.aliyuncs.com/hipos-kds-v.5.10.031-g.apk",
             "${filesDir.path}/updateApk/",
             "newApk.apk",
             commonResultListener = object : CommonResultListener<File> {
-                override fun onSuccess(result: File) {
-                    LogUtil.logI("onSuccess")
-                    SystemHelper.installApk(this@MainActivity, result)
-                }
-
-                override fun onError(message: String) {
-                    LogUtil.logI("message: $message")
-                }
-
                 override fun onProgress(currentProgress: Float) {
-//                    LogUtil.logI("currentProgress: $currentProgress")
+                    LogUtil.logI("currentProgress: $currentProgress")
                 }
             }
         )
+//        DownloadHelper.downloadFile(
+//            "https://hipos.oss-cn-shanghai.aliyuncs.com/hipos-kds-v.5.10.031-g.apk",
+//            "${filesDir.path}/updateApk/",
+//            "newApk.apk",
+//            commonResultListener = object : CommonResultListener<File> {
+//                override fun onSuccess(result: File) {
+//                    LogUtil.logI("onSuccess")
+//                    SystemHelper.installApk(this@MainActivity, result)
+//                }
+//
+//                override fun onError(message: String) {
+//                    LogUtil.logI("message: $message")
+//                }
+//
+//                override fun onProgress(currentProgress: Float) {
+////                    LogUtil.logI("currentProgress: $currentProgress")
+//                }
+//            }
+//        )
     }
 
 }

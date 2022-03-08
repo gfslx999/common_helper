@@ -6,15 +6,17 @@ import android.media.RingtoneManager
 import android.net.Uri
 import com.fs.freedom.basic.expand.smartLog
 import com.fs.freedom.basic.helper.AppHelper
+import com.fs.freedom.basic.helper.FileHelper
 import com.fs.freedom.basic.listener.CommonResultListener
+import com.fs.freedom.basic.model.SystemRingtoneModel
 import com.fs.freedom.basic.util.LogUtil
+import java.lang.Exception
 
 /**
  * 系统铃声帮助类
  */
 internal object SystemRingtoneHelper {
 
-    private var mCachesRingtoneMap = mutableMapOf<String, Uri>()
     private var mRingtone: Ringtone? = null
 
     /**
@@ -73,63 +75,52 @@ internal object SystemRingtoneHelper {
      * [ringtoneType] 铃声类型, 参见 [RingtoneManager].TYPE_XXX
      * [commonResultListener] key 为 铃声名称，value 为 铃声路径。
      * 该方法每个回调都会在调用线程回调。
-     * 通过缓存map来提高效率，如有刷新需求，请调用 [clearRingtoneCachesMap]
      */
-    fun getSystemRingtoneMap(
+    fun getSystemRingtoneList(
         context: Context?,
         ringtoneType: Int,
-        commonResultListener: CommonResultListener<String>,
+        commonResultListener: CommonResultListener<SystemRingtoneModel>,
     ){
         if (context == null) {
             commonResultListener.onError("Context is null!")
             return
         }
+        //传递的type类型是否符合我们预期的类型
         if (ringtoneType != RingtoneManager.TYPE_RINGTONE && ringtoneType != RingtoneManager.TYPE_NOTIFICATION &&
                 ringtoneType != RingtoneManager.TYPE_ALARM && ringtoneType != RingtoneManager.TYPE_ALL) {
             commonResultListener.onError("ringtoneType is does not fit any type!")
             return
         }
         val isInMainThread = AppHelper.checkIsInMainThread()
-        if (mCachesRingtoneMap.isNotEmpty()) {
-            handleRingtoneResult(
-                mCachesRingtoneMap,
-                commonResultListener,
-                isInMainThread
-            )
-            return
-        }
+
         commonResultListener.onStart()
         Thread {
-            val titleAndPathMap = mutableMapOf<String, Uri>()
+            try {
+                val list = mutableListOf<SystemRingtoneModel>()
 
-            val manager = RingtoneManager(context)
-            manager.setType(ringtoneType)
-            val cursor = manager.cursor
-            if (cursor.moveToFirst()) {
-                while (cursor.moveToNext()) {
-                    val ringtoneTitle = manager.getRingtone(cursor.position).getTitle(context)
-                    val ringtoneUri = manager.getRingtoneUri(cursor.position)
-                    titleAndPathMap[ringtoneTitle] = ringtoneUri
+                val manager = RingtoneManager(context)
+                manager.setType(ringtoneType)
+                val cursor = manager.cursor
+                //获取到每个铃声信息
+                if (cursor.moveToFirst()) {
+                    while (cursor.moveToNext()) {
+                        val ringtoneTitle = manager.getRingtone(cursor.position).getTitle(context)
+                        val ringtoneUri = manager.getRingtoneUri(cursor.position)
+                        list.add(SystemRingtoneModel(ringtoneTitle, ringtoneUri.toString()))
+                    }
                 }
+                cursor.close()
+
+                handleRingtoneResult(
+                    list,
+                    commonResultListener,
+                    isInMainThread
+                )
+            } catch (e: Exception) {
+                commonResultListener.onError(e.message ?: "$e")
+                smartLog { e.printStackTrace() }
             }
-            cursor.close()
-            mCachesRingtoneMap = titleAndPathMap
-
-            handleRingtoneResult(
-                titleAndPathMap,
-                commonResultListener,
-                isInMainThread
-            )
         }.start()
-    }
-
-    /**
-     * 清空系统铃声缓存
-     */
-    fun clearRingtoneCachesMap() {
-        if (mCachesRingtoneMap.isNotEmpty()) {
-            mCachesRingtoneMap.clear()
-        }
     }
 
     /**
@@ -140,21 +131,21 @@ internal object SystemRingtoneHelper {
      * 处理获取系统铃声返回
      */
     private fun handleRingtoneResult(
-        titleAndPathMap: MutableMap<String, Uri>,
-        commonResultListener: CommonResultListener<String>,
+        ringtoneModelList: MutableList<SystemRingtoneModel>,
+        commonResultListener: CommonResultListener<SystemRingtoneModel>,
         isInMainThreadOriginal: Boolean) {
         //检测之前是否位于主线程
         if (isInMainThreadOriginal) {
             AppHelper.runOnUiThread {
-                if (titleAndPathMap.isNotEmpty()) {
-                    commonResultListener.onSuccess(titleAndPathMap)
+                if (ringtoneModelList.isNotEmpty()) {
+                    commonResultListener.onSuccess(ringtoneModelList)
                 } else {
                     commonResultListener.onEmpty()
                 }
             }
         } else{
-            if (titleAndPathMap.isNotEmpty()) {
-                commonResultListener.onSuccess(titleAndPathMap)
+            if (ringtoneModelList.isNotEmpty()) {
+                commonResultListener.onSuccess(ringtoneModelList)
             } else {
                 commonResultListener.onEmpty()
             }

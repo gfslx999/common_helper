@@ -4,8 +4,8 @@ import android.content.Context
 import android.media.RingtoneManager
 import android.net.Uri
 import com.fs.freedom.basic.helper.internal.SystemRingtoneHelper
-import com.fs.freedom.basic.helper.internal.SystemRingtoneHelper.clearRingtoneCachesMap
 import com.fs.freedom.basic.listener.CommonResultListener
+import com.fs.freedom.basic.model.SystemRingtoneModel
 
 object MediaHelper {
 
@@ -47,23 +47,14 @@ object MediaHelper {
      * [RingtoneManager.TYPE_ALARM]: 指代用于警报的声音的类型。
      * [RingtoneManager.TYPE_ALL]: 所有类型的声音。
      *
-     * [commonResultListener] result, key 为 铃声名称，value 为 铃声路径。
      * 该方法每个回调都会在调用线程回调。
-     * 通过缓存map来提高效率，如有刷新需求，请调用 [clearRingtoneCachesMap]
      */
-    fun getSystemRingtoneMap(
+    fun getSystemRingtoneList(
         context: Context?,
         ringtoneType: Int,
-        commonResultListener: CommonResultListener<String>
+        commonResultListener: CommonResultListener<SystemRingtoneModel>
     ){
-        SystemRingtoneHelper.getSystemRingtoneMap(context, ringtoneType, commonResultListener)
-    }
-
-    /**
-     * 清空系统铃声缓存
-     */
-    fun clearRingtoneCachesMap() {
-        SystemRingtoneHelper.clearRingtoneCachesMap()
+        SystemRingtoneHelper.getSystemRingtoneList(context, ringtoneType, commonResultListener)
     }
 
     /**

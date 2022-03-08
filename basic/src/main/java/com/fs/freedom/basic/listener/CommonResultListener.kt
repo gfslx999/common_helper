@@ -7,10 +7,7 @@ import android.net.Uri
  */
 interface CommonResultListener <T> {
     //正在加载
-    fun onLoading() {}
-
-    //加载完成
-    fun onHideLoading() {}
+    fun onStart() {}
 
     //加载成功，回调map
     fun onSuccess(result: Map<String, Uri>) {}

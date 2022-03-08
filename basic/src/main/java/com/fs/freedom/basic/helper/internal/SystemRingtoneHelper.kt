@@ -6,7 +6,6 @@ import android.media.RingtoneManager
 import android.net.Uri
 import com.fs.freedom.basic.expand.smartLog
 import com.fs.freedom.basic.helper.AppHelper
-import com.fs.freedom.basic.helper.FileHelper
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.util.LogUtil
 
@@ -99,7 +98,7 @@ internal object SystemRingtoneHelper {
             )
             return
         }
-        commonResultListener.onLoading()
+        commonResultListener.onStart()
         Thread {
             val titleAndPathMap = mutableMapOf<String, Uri>()
 
@@ -147,7 +146,6 @@ internal object SystemRingtoneHelper {
         //检测之前是否位于主线程
         if (isInMainThreadOriginal) {
             AppHelper.runOnUiThread {
-                commonResultListener.onHideLoading()
                 if (titleAndPathMap.isNotEmpty()) {
                     commonResultListener.onSuccess(titleAndPathMap)
                 } else {
@@ -155,7 +153,6 @@ internal object SystemRingtoneHelper {
                 }
             }
         } else{
-            commonResultListener.onHideLoading()
             if (titleAndPathMap.isNotEmpty()) {
                 commonResultListener.onSuccess(titleAndPathMap)
             } else {

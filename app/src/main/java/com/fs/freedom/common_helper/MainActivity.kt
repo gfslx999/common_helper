@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             commonResultListener = object : CommonResultListener<File> {
                 override fun onSuccess(result: File) {
                     LogUtil.logI("onSuccess")
-                    SystemHelper.installApkCommon(this@MainActivity, result)
+                    SystemHelper.installApk(this@MainActivity, result)
                 }
 
                 override fun onError(message: String) {

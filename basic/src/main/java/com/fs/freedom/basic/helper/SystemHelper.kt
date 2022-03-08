@@ -3,22 +3,28 @@ package com.fs.freedom.basic.helper
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Dialog
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import android.text.TextUtils
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
+import com.fs.freedom.basic.R
 import com.fs.freedom.basic.constant.CommonConstant
 import com.fs.freedom.basic.expand.smartLog
+import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.util.LogUtil
 import com.permissionx.guolindev.PermissionX
 import com.permissionx.guolindev.callback.RequestCallback
+import com.permissionx.guolindev.dialog.DefaultDialog
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.lang.RuntimeException
@@ -26,16 +32,17 @@ import kotlin.Exception
 
 object SystemHelper : Activity() {
 
-    private const val REQUEST_CODE_INSTALL_PACKAGE = 1
+    //安装apk前进入 '允许安装其他应用' 时调用
+    const val OPEN_INSTALL_PACKAGE_PERMISSION = "OPEN_INSTALL_PACKAGE_PERMISSION"
 
     /**
      * 获取设备的品牌信息和型号
      */
     val deviceName: String
         get() {
-            val deviceName = Build.BRAND + " " + Build.MODEL
+            val deviceName = Build.BRAND + "|" + Build.MODEL
             if (TextUtils.isEmpty(deviceName)) {
-                return  CommonConstant.UNKNOWN
+                return CommonConstant.UNKNOWN
             }
             return deviceName
         }
@@ -77,26 +84,88 @@ object SystemHelper : Activity() {
     }
 
     /**
+     * 下载并安装apk
+     */
+    @SuppressLint("QueryPermissionsNeeded")
+    fun downloadAndInstallApk(
+        activity: Activity?,
+        fileUrl: String?,
+        filePath: String?,
+        fileName: String?,
+        isDeleteOriginalFile: Boolean = true,
+        explainContent: String = "您必须同意 '应用内安装其他应用' 权限才能完成升级",
+        positiveText: String = "确认",
+        negativeText: String = "取消",
+        commonResultListener: CommonResultListener<File>
+    ) {
+        if (activity == null) {
+            commonResultListener.onError("context is null!")
+            return
+        }
+        commonResultListener.onStart()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+            intent.data = Uri.parse("package:${activity.packageName}")
+            val resolveActivity = intent.resolveActivity(activity.packageManager)
+            if (resolveActivity != null) {
+                val isHasPermission = activity.packageManager?.canRequestPackageInstalls() ?: false
+                if (!isHasPermission) {
+                    commonResultListener.onError(OPEN_INSTALL_PACKAGE_PERMISSION)
+                    intoManageUnknownAppPage(
+                        activity,
+                        explainContent = explainContent,
+                        positiveText = positiveText,
+                        negativeText = negativeText
+                    )
+                    return
+                }
+            }
+        }
+
+        DownloadHelper.downloadFile(fileUrl, filePath, fileName, isDeleteOriginalFile, object :CommonResultListener<File> {
+            override fun onSuccess(result: File) {
+                installApk(
+                    activity,
+                    apkFile = result,
+                    explainContent = explainContent,
+                    positiveText = positiveText,
+                    negativeText = negativeText)
+            }
+
+            override fun onError(message: String) {
+                commonResultListener.onError(message)
+            }
+
+            override fun onProgress(currentProgress: Float) {
+                commonResultListener.onProgress(currentProgress)
+            }
+        })
+    }
+
+    /**
      * 安装apk
      *
      * 使用此功能需要在清单文件中配置 FileProvider
+     * [commonResultListener] 仅回调 onStart、onError
      */
     @SuppressLint("QueryPermissionsNeeded")
     fun installApk(
-        activity: FragmentActivity?,
+        activity: Activity?,
         apkFile: File?,
         explainContent: String = "您必须同意 '应用内安装其他应用' 权限才能完成升级",
         positiveText: String = "确认",
         negativeText: String = "取消",
+        commonResultListener: CommonResultListener<File>? = null
     ) {
         if (activity == null) {
-            LogUtil.logI("installApk: activity is null!")
+            LogUtil.logE("installApk: activity is null!")
             return
         }
         if (apkFile == null || !apkFile.exists()) {
-            LogUtil.logI("installApk: install failed, apk file == null or it's not exists")
+            LogUtil.logE("installApk: install failed, apk file == null or it's not exists")
             return
         }
+        commonResultListener?.onStart()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //检测当前机型是否支持跳转到 设置详情页，如不支持，则直接进行安装
             try {
@@ -113,9 +182,13 @@ object SystemHelper : Activity() {
                 return
             }
 
-            val isGranted =
-                PermissionX.isGranted(activity, Manifest.permission.REQUEST_INSTALL_PACKAGES)
-            if (!isGranted) {
+            val isGranted = activity.packageManager.canRequestPackageInstalls()
+            if (isGranted) {
+                toInstallApk(activity, apkFile)
+                return
+            }
+
+            if (activity is FragmentActivity) {
                 PermissionX.init(activity).permissions(Manifest.permission.REQUEST_INSTALL_PACKAGES)
                     .onExplainRequestReason { scope, deniedlist ->
                         scope.showRequestReasonDialog(
@@ -128,7 +201,14 @@ object SystemHelper : Activity() {
                         toInstallApk(activity, apkFile)
                     }
             } else {
-                toInstallApk(activity, apkFile)
+                commonResultListener?.onError(OPEN_INSTALL_PACKAGE_PERMISSION)
+                intoManageUnknownAppPage(
+                    activity,
+                    apkFile,
+                    explainContent = explainContent,
+                    positiveText = positiveText,
+                    negativeText = negativeText
+                )
             }
         } else {
             toInstallApk(activity, apkFile)
@@ -136,57 +216,54 @@ object SystemHelper : Activity() {
     }
 
     /**
-     * 安装apk，此方法适用于无法获取Fragment/FragmentActivity情况
-     *
-     * 使用此功能需要在清单文件中配置 FileProvider
+     * 弹出弹窗提示，确认后，进入管理 '允许安装其他应用' 权限界面
      */
-    @SuppressLint("QueryPermissionsNeeded")
-    fun installApkCommon(
-        activity: Activity?,
-        apkFile: File?,
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun intoManageUnknownAppPage(
+        activity: Activity,
+        apkFile: File? = null,
+        explainContent: String = "您必须同意 '应用内安装其他应用' 权限才能完成升级",
+        positiveText: String = "确认",
+        negativeText: String = "取消",
     ) {
-        if (activity == null) {
-            LogUtil.logI("installApk: activity is null!")
-            return
-        }
-        if (apkFile == null || !apkFile.exists()) {
-            LogUtil.logI("installApk: install failed, apk file == null or it's not exists")
-            return
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //检测当前机型是否支持跳转到 设置详情页，如不支持，则直接进行安装
+        //弹出弹窗提示
+        val defaultDialog = DefaultDialog(
+            activity,
+            listOf(Manifest.permission.REQUEST_INSTALL_PACKAGES),
+            message = explainContent,
+            positiveText = positiveText,
+            negativeText = negativeText,
+            -1,
+            -1
+        )
+        defaultDialog.show()
+
+        defaultDialog.positiveButton.setOnClickListener {
+            defaultDialog.dismiss()
             try {
                 val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
                 intent.data = Uri.parse("package:${activity.packageName}")
-                val resolveActivity = intent.resolveActivity(activity.packageManager)
-                if (resolveActivity == null) {
-                    toInstallApk(activity, apkFile)
-                    return
-                }
-            } catch (e: RuntimeException) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                activity.startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
                 smartLog { e.printStackTrace() }
-                toInstallApk(activity, apkFile)
-                return
-            }
-            val isGranted = activity.packageManager.canRequestPackageInstalls()
-
-            if (!isGranted) {
-                try {
-                    val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
-                    intent.data = Uri.parse("package:${activity.packageName}")
-                    activity.startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    smartLog { e.printStackTrace() }
+                if (apkFile != null) {
                     toInstallApk(activity, apkFile)
                 }
-            } else {
-                toInstallApk(activity, apkFile)
             }
-        } else {
-            toInstallApk(activity, apkFile)
+        }
+        defaultDialog.negativeButton?.setOnClickListener {
+            defaultDialog.dismiss()
         }
     }
 
+    /**
+     * ========================== PrivateApi ==========================
+     */
+
+    /**
+     * 进入系统安装应用界面
+     */
     @SuppressLint("SetWorldReadable", "SetWorldWritable")
     private fun toInstallApk(activity: Activity, apkFile: File) {
         try {

@@ -96,6 +96,8 @@ fun callPhoneToShake(
  * 注意：如果想达到跳转页面去开启权限后还能自动执行刚才中断的流程，那就要保证 [activity] 为 FragmentActivity 或其子类；
  * 如不能保证，那么需要根据 commonResultListener.onError 的回调值为[SystemHelper.OPEN_INSTALL_PACKAGE_PERMISSION]的时候，
  * 在onResume方法内重新调用此方法，达到继续执行的目的
+ * 
+ * 参考：https://github.com/gfslx999/flutter_native_helper/blob/master/android/src/main/kotlin/com/gfs/helper/flutter_native_helper/FlutterNativeHelperPlugin.kt
  */
 @SuppressLint("QueryPermissionsNeeded")
 fun installApk(
@@ -117,6 +119,8 @@ fun installApk(
  * 在onResume方法内重新调用此方法，达到继续执行的目的
  * 
  * 参数注释详见 DownloadHelper.downloadFile
+ *
+ * 参考：https://github.com/gfslx999/flutter_native_helper/blob/master/android/src/main/kotlin/com/gfs/helper/flutter_native_helper/FlutterNativeHelperPlugin.kt
  */
 @SuppressLint("QueryPermissionsNeeded")
 fun downloadAndInstallApk(

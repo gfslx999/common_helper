@@ -7,16 +7,24 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import com.fs.freedom.basic.util.LogUtil
 import com.fs.freedom.basic.util.ToastUtil
 
 object FileHelper {
 
-    fun getUriRealPath(context: Context, uri: Uri?) : String? {
-        if (uri == null) {
-            ToastUtil.showToast(context,"uri为空")
+    /**
+     * 将Uri转换为真实路径
+     */
+    fun transformUriToRealPath(context: Context?, uri: Uri?) : String {
+        if (context == null) {
+            LogUtil.logI("transformUriToRealPath: context is null")
             return ""
         }
-        return getFileRealPathFromApiBigger19(context, uri)
+        if (uri == null) {
+            LogUtil.logI("transformUriToRealPath: uri is null")
+            return ""
+        }
+        return getFileRealPathFromApiBigger19(context, uri) ?: ""
     }
 
     /**

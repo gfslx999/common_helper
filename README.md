@@ -5,7 +5,7 @@
 #### 如果你Gradle Version < 7.0, 在 build.gradle内
 
 ```kotlin
-    repositories {
+repositories {
     maven { url 'https://jitpack.io' }
 }
 ```
@@ -13,7 +13,7 @@
 #### 如果你Gradle Version >= 7.0, 在 settings.gradle内
 
 ```kotlin
-    repositories {
+repositories {
     maven { url 'https://jitpack.io' }
 }
 ```
@@ -37,6 +37,8 @@
  */
 BasicInitial.initial(applicationContext, isCanLogInBasicModel = true)
 ```
+
+### 如果你要使用安装apk相关的功能，一定要记得配置FileProvider!!!
 
 ## API 说明
 

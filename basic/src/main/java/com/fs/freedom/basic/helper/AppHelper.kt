@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import com.fs.freedom.basic.constant.CommonConstant
+import com.fs.freedom.basic.expand.smartLog
 import com.fs.freedom.basic.util.LogUtil
 import kotlin.RuntimeException
 
@@ -33,6 +34,27 @@ object AppHelper {
                 runtimeException.printStackTrace()
             }
             false
+        }
+    }
+
+    /**
+     * 打开应用市场-当前应用页面
+     */
+    fun openAppMarket(activity: Activity?, targetMarketPackageName: String?) {
+        if (activity == null) {
+            LogUtil.logE("openAppMarket: activity is null!")
+            return
+        }
+
+        try {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                `package` = targetMarketPackageName
+                data = Uri.parse("market://details?id=${activity.packageName}")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            activity.startActivity(intent)
+        } catch (e: Exception) {
+            smartLog { e.printStackTrace() }
         }
     }
 

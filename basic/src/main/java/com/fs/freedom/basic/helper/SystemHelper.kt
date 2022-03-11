@@ -9,6 +9,8 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
@@ -232,6 +234,20 @@ object SystemHelper : Activity() {
             }
         } else {
             toInstallApk(activity, apkFile)
+        }
+    }
+
+    //test
+    @SuppressLint("QueryPermissionsNeeded")
+    fun getAllAppNamesAndPackages(activity: Activity?) {
+        if (activity == null) {
+            LogUtil.logE("getAllAppNamesAndPackages: activity is null!")
+            return
+        }
+        val installedApplications = activity.packageManager.getInstalledApplications(0)
+        for (application in installedApplications) {
+            val applicationLabel = activity.packageManager.getApplicationLabel(application)
+            LogUtil.logI("${applicationLabel}:${application.packageName}")
         }
     }
 

@@ -2,6 +2,7 @@ package com.fs.freedom.common_helper
 
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,7 @@ import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -26,11 +28,10 @@ class MainActivity : AppCompatActivity() {
 
         btnFirst.text = "到应用商店"
         btnFirst.setOnClickListener {
-            val deviceName = SystemHelper.deviceName
-            LogUtil.logI("deviceName: $deviceName")
-            AppHelper.openAppMarket(this, "com.huawei.appmarket")
+            AppHelper.openAppMarket(this, isOpenSystemMarket = true)
         }
         btnSecond.setOnClickListener {
+            SystemHelper.getAllAppNamesAndPackages(this)
         }
 
     }

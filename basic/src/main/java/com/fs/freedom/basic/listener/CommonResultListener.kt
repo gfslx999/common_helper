@@ -6,8 +6,8 @@ import android.net.Uri
  * 通用结果回调
  */
 interface CommonResultListener <T> {
-    //正在加载
-    fun onStart() {}
+    //开始加载
+    fun onStart(attachParam: Any? = null) {}
 
     //加载成功，回调指定泛型对象
     fun onSuccess(result: T) {}

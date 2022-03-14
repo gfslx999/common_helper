@@ -22,6 +22,7 @@ import androidx.fragment.app.FragmentActivity
 import com.fs.freedom.basic.R
 import com.fs.freedom.basic.constant.CommonConstant
 import com.fs.freedom.basic.expand.smartLog
+import com.fs.freedom.basic.helper.DownloadHelper.cancelDownload
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.util.LogUtil
 import com.permissionx.guolindev.PermissionX
@@ -90,6 +91,9 @@ object SystemHelper : Activity() {
 
     /**
      * 下载并安装apk
+     *
+     * 如果连续调用多次此方法，并且[fileUrl]、[filePath]、[fileName]完全一致，则不会重复下载，回调onError = [CommonConstant.ERROR_SAME_FILE_DOWNLOADED]
+     * 如需取消请求，可以调用[DownloadHelper.cancelDownload]，tag: 使用 onStart 中回调的参数。
      */
     @SuppressLint("QueryPermissionsNeeded")
     fun downloadAndInstallApk(
@@ -145,6 +149,10 @@ object SystemHelper : Activity() {
         }
 
         DownloadHelper.downloadFile(fileUrl, filePath, fileName, isDeleteOriginalFile, object :CommonResultListener<File> {
+            override fun onStart(attachParam: Any?) {
+                commonResultListener.onStart(attachParam)
+            }
+
             override fun onSuccess(result: File) {
                 installApk(
                     activity,

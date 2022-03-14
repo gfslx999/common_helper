@@ -46,11 +46,11 @@ BasicInitial.initial(applicationContext, isCanLogInBasicModel = true)
 
 ```kotlin
 /**
- * 获取系统铃声列表回调
+ * 通用异步回调
  */
 interface CommonResultListener<T> {
-    //正在加载
-    fun onStart() {}
+    //开始加载
+    fun onStart(attachParam: Any? = null) {}
 
     //加载成功，回调指定泛型对象
     fun onSuccess(result: T) {}
@@ -72,7 +72,7 @@ interface CommonResultListener<T> {
 #### SystemHelper
 
 ```kotlin
-    /**
+/**
  * 获取设备的品牌信息和型号
  */
 val deviceName: String
@@ -117,10 +117,12 @@ fun installApk(
  * 注意：如果想达到跳转页面去开启权限后还能自动执行刚才中断的流程，那就要保证 [activity] 为 FragmentActivity 或其子类；
  * 如不能保证，那么需要根据 commonResultListener.onError 的回调值为[SystemHelper.OPEN_INSTALL_PACKAGE_PERMISSION]的时候，
  * 在onResume方法内重新调用此方法，达到继续执行的目的
- * 
- * 参数注释详见 DownloadHelper.downloadFile
- *
  * 参考：https://github.com/gfslx999/flutter_native_helper/blob/master/android/src/main/kotlin/com/gfs/helper/flutter_native_helper/FlutterNativeHelperPlugin.kt
+ *
+ * 参数注释详见 DownloadHelper.downloadFile
+ * 
+ * 如果连续调用多次此方法，并且[fileUrl]、[filePath]、[fileName]完全一致，则不会重复下载，回调onError = [CommonConstant.ERROR_SAME_FILE_DOWNLOADED]
+ * 如需取消请求，可以调用[DownloadHelper.cancelDownload]，tag: 使用 commonResultListener.onStart 中回调的参数。
  */
 @SuppressLint("QueryPermissionsNeeded")
 fun downloadAndInstallApk(
@@ -140,7 +142,8 @@ fun downloadAndInstallApk(
 #### DownloadHelper
 
 ```kotlin
-    /**
+
+/**
  * 下载文件
  *
  * [fileUrl] require 文件远程地址
@@ -149,6 +152,8 @@ fun downloadAndInstallApk(
  * [isDeleteOriginalFile] 是否自动删除已有的同名文件，默认为 true
  * [commonResultListener] require 成功时回调[CommonResultListener.onSuccess (result T)]，确保文件确实存在
  *
+ * 如果连续调用多次此方法，并且[fileUrl]、[filePath]、[fileName]完全一致，则不会重复下载，回调onError = [CommonConstant.ERROR_SAME_FILE_DOWNLOADED]
+ * 如需取消请求，可以调用[DownloadHelper.cancelDownload]，tag: 使用 commonResultListener.onStart 中回调的参数。
  * 注⚠️：本方法不处理权限请求，即如果需要使用应用沙盒以外的路径，需自行处理权限请求
  */
 fun downloadFile(
@@ -157,8 +162,15 @@ fun downloadFile(
     fileName: String?,
     isDeleteOriginalFile: Boolean = true,
     commonResultListener: CommonResultListener<File>
-) {
-}
+) {}
+
+/**
+ * 取消下载
+ *
+ * [tag] 调用下载时 commonResultListener.onStart 的回调参数
+ */
+fun cancelDownload(tag: String) {}
+
 ```
 
 #### MediaHelper
@@ -207,7 +219,7 @@ fun getSystemRingtoneMap(
 ##### AppHelper
 
 ```kotlin
-    /**
+/**
  * 进入当前应用-设置-详情页面
  */
 fun intoAppSettingDetail(activity: Activity): Boolean {}
@@ -226,8 +238,33 @@ fun checkIsInMainThread(): Boolean {}
  * 切换到主线程
  */
 fun runOnUiThread(function: () -> Unit) {}
+
+/**
+ * 打开应用市场-当前应用页面
+ *
+ * [targetMarketPackageName] 指定应用市场包名
+ * [isOpenSystemMarket] 如 'targetMarketPackageName' 为空，是否打开本机自带应用市场，
+ * 为true时，将直接尝试打开当前厂商系统应用商店，否则系统会弹出弹窗自行选择应用市场。
+ *
+ * 简单来说，如果你有指定的应用市场，就传递 'targetMarketPackageName' 为对应应用市场的包名；
+ * 如果你没有指定的应用市场，但是想让大部分机型都打开厂商应用商店，那么就设置 'isOpenSystemMarket' 为true
+ * 
+ * 支持打开的厂商，在下方。不支持的、或处理失败的将交由系统处理
+ */
+fun openAppMarket(
+    activity: Activity?,
+    targetMarketPackageName: String = "",
+    isOpenSystemMarket: Boolean = false
+)
 ```
 
-```kotlin
-
-```
+| 支持的厂商 |
+| ------ |
+| 华为 |
+| 小米 |
+| OPPO |
+| VIVO |
+| 三星 |
+| 魅族 |
+| 谷歌 |
+| 联想 |

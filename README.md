@@ -1,5 +1,23 @@
 # CommonHelper
 
+## 功能：
+
+### 应用内更新
+
+* 下载并安装apk、仅安装apk - SystemHelper
+* 跳转到应用市场-当前应用详情页 - AppHelper
+* 跳转到设置-应用详情页 - SystemHelper
+
+### 媒体相关
+
+* 获取系统 铃声/通知/警报 列表 - MediaHelper
+* 播放/暂停系统 铃声/通知/警报 - MediaHelper
+* 控制设备震动 - SystemHelper
+
+### 下载文件
+
+* 下载文件/取消下载 - DownloadHelper
+
 ## 引入
 
 #### 如果你Gradle Version < 7.0, 在 build.gradle内

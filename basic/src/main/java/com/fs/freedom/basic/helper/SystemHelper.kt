@@ -94,6 +94,8 @@ object SystemHelper : Activity() {
      *
      * 如果连续调用多次此方法，并且[fileUrl]、[filePath]、[fileName]完全一致，则不会重复下载，回调onError = [CommonConstant.ERROR_SAME_FILE_DOWNLOADED]
      * 如需取消请求，可以调用[DownloadHelper.cancelDownload]，tag: 使用 onStart 中回调的参数。
+     *
+     * [commonResultListener] 回调 onSuccess 代表跳转安装界面成功，并不代表安装成功
      */
     @SuppressLint("QueryPermissionsNeeded")
     fun downloadAndInstallApk(
@@ -140,7 +142,8 @@ object SystemHelper : Activity() {
                             activity,
                             explainContent = explainContent,
                             positiveText = positiveText,
-                            negativeText = negativeText
+                            negativeText = negativeText,
+                            commonResultListener = commonResultListener
                         )
                     }
                     return
@@ -159,7 +162,9 @@ object SystemHelper : Activity() {
                     apkFile = result,
                     explainContent = explainContent,
                     positiveText = positiveText,
-                    negativeText = negativeText)
+                    negativeText = negativeText,
+                    commonResultListener = commonResultListener
+                )
             }
 
             override fun onError(message: String) {
@@ -203,18 +208,18 @@ object SystemHelper : Activity() {
                 intent.data = Uri.parse("package:${activity.packageName}")
                 val resolveActivity = intent.resolveActivity(activity.packageManager)
                 if (resolveActivity == null) {
-                    toInstallApk(activity, apkFile)
+                    toInstallApk(activity, apkFile, commonResultListener)
                     return
                 }
             } catch (e: RuntimeException) {
                 smartLog { e.printStackTrace() }
-                toInstallApk(activity, apkFile)
+                toInstallApk(activity, apkFile, commonResultListener)
                 return
             }
 
             val isGranted = activity.packageManager.canRequestPackageInstalls()
             if (isGranted) {
-                toInstallApk(activity, apkFile)
+                toInstallApk(activity, apkFile, commonResultListener)
                 return
             }
 
@@ -228,7 +233,7 @@ object SystemHelper : Activity() {
                         if (!allGranted) {
                             return@request
                         }
-                        toInstallApk(activity, apkFile)
+                        toInstallApk(activity, apkFile, commonResultListener)
                     }
             } else {
                 commonResultListener?.onError(OPEN_INSTALL_PACKAGE_PERMISSION)
@@ -237,11 +242,12 @@ object SystemHelper : Activity() {
                     apkFile,
                     explainContent = explainContent,
                     positiveText = positiveText,
-                    negativeText = negativeText
+                    negativeText = negativeText,
+                    commonResultListener = commonResultListener
                 )
             }
         } else {
-            toInstallApk(activity, apkFile)
+            toInstallApk(activity, apkFile, commonResultListener)
         }
     }
 
@@ -273,6 +279,7 @@ object SystemHelper : Activity() {
         explainContent: String = "您必须同意 '应用内安装其他应用' 权限才能完成升级",
         positiveText: String = "确认",
         negativeText: String = "取消",
+        commonResultListener: CommonResultListener<File>? = null
     ) {
         //弹出弹窗提示
         val defaultDialog = DefaultDialog(
@@ -296,7 +303,7 @@ object SystemHelper : Activity() {
             } catch (e: ActivityNotFoundException) {
                 smartLog { e.printStackTrace() }
                 if (apkFile != null) {
-                    toInstallApk(activity, apkFile)
+                    toInstallApk(activity, apkFile, commonResultListener = commonResultListener)
                 }
             }
         }
@@ -309,7 +316,7 @@ object SystemHelper : Activity() {
      * 进入系统安装应用界面
      */
     @SuppressLint("SetWorldReadable", "SetWorldWritable")
-    private fun toInstallApk(activity: Activity, apkFile: File) {
+    private fun toInstallApk(activity: Activity, apkFile: File, commonResultListener: CommonResultListener<File>? = null) {
         try {
             apkFile.setExecutable(true, false)
             apkFile.setReadable(true, false)
@@ -332,9 +339,13 @@ object SystemHelper : Activity() {
 
             intent.setDataAndType(uri, "application/vnd.android.package-archive")
             activity.startActivity(intent)
+
+            commonResultListener?.onSuccess(apkFile)
         } catch (e: ActivityNotFoundException) {
+            commonResultListener?.onError("安装失败：${e.message}")
             smartLog { e.printStackTrace() }
         } catch (e: IllegalArgumentException) {
+            commonResultListener?.onError("安装失败：${e.message}")
             smartLog { e.printStackTrace() }
         }
     }

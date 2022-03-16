@@ -55,6 +55,10 @@ class MainActivity : AppCompatActivity() {
                         mTag = attachParam
                     }
                 }
+
+                override fun onSuccess(result: File) {
+                    ToastUtil.showToast(this@MainActivity,"跳转安装界面成功")
+                }
                 override fun onProgress(currentProgress: Float) {
                     LogUtil.logI("currentProgress: $currentProgress")
                 }
@@ -64,17 +68,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
-//        SystemHelper.downloadAndInstallApk(
-//            this,
-//            "https://hipos.oss-cn-shanghai.aliyuncs.com/hipos-kds-v.5.10.031-g.apk",
-//            "${filesDir.path}/updateApk/",
-//            "newApk.apk",
-//            commonResultListener = object : CommonResultListener<File> {
-//                override fun onProgress(currentProgress: Float) {
-//                    LogUtil.logI("currentProgress: $currentProgress")
-//                }
-//            }
-//        )
     }
 
 }

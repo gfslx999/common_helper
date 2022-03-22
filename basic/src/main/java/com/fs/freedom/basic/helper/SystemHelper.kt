@@ -41,6 +41,10 @@ object SystemHelper : Activity() {
     private val installApkJudgeRule: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT < Build.VERSION_CODES.R
 
+    private const val mDefaultExplainContent = "您必须同意 '应用内安装其他应用' 权限才能完成升级"
+    private const val mDefaultPositiveText = "确认"
+    private const val mDefaultNegativeText = "取消"
+
     /**
      * 获取设备的品牌信息和型号
      */
@@ -104,21 +108,36 @@ object SystemHelper : Activity() {
         filePath: String?,
         fileName: String?,
         isDeleteOriginalFile: Boolean = true,
-        explainContent: String = "您必须同意 '应用内安装其他应用' 权限才能完成升级",
-        positiveText: String = "确认",
-        negativeText: String = "取消",
+        explainContent: String? = mDefaultExplainContent,
+        positiveText: String? = mDefaultPositiveText,
+        negativeText: String? = mDefaultNegativeText,
         commonResultListener: CommonResultListener<File>
     ) {
         if (activity == null) {
             commonResultListener.onError("context is null!")
             return
         }
-        commonResultListener.onStart()
         if (installApkJudgeRule) {
             val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
             intent.data = Uri.parse("package:${activity.packageName}")
             val resolveActivity = intent.resolveActivity(activity.packageManager)
             if (resolveActivity != null) {
+                val finllayExplainContent = if (!explainContent.isNullOrEmpty()) {
+                    explainContent
+                } else {
+                    mDefaultExplainContent
+                }
+                val finllayNegativeText = if (!negativeText.isNullOrEmpty()) {
+                    negativeText
+                } else {
+                    mDefaultNegativeText
+                }
+                val finallyPositiveText = if (!positiveText.isNullOrEmpty()) {
+                    positiveText
+                } else {
+                    mDefaultPositiveText
+                }
+
                 val isHasPermission = activity.packageManager?.canRequestPackageInstalls() ?: false
                 if (!isHasPermission) {
                     //如果为 FragmentActivity 可直接通过三方库来完成；
@@ -128,7 +147,7 @@ object SystemHelper : Activity() {
                         PermissionX.init(activity).permissions(Manifest.permission.REQUEST_INSTALL_PACKAGES)
                             .onExplainRequestReason { scope, deniedlist ->
                                 scope.showRequestReasonDialog(
-                                    deniedlist, explainContent, positiveText, negativeText)
+                                    deniedlist, finllayExplainContent, finallyPositiveText, finllayNegativeText)
                             }.request { allGranted, _, _ ->
                                 if (!allGranted) {
                                     return@request
@@ -140,9 +159,9 @@ object SystemHelper : Activity() {
                         commonResultListener.onError(OPEN_INSTALL_PACKAGE_PERMISSION)
                         intoManageUnknownAppPage(
                             activity,
-                            explainContent = explainContent,
-                            positiveText = positiveText,
-                            negativeText = negativeText,
+                            explainContent = finllayExplainContent,
+                            positiveText = finallyPositiveText,
+                            negativeText = finllayNegativeText,
                             commonResultListener = commonResultListener
                         )
                     }
@@ -150,6 +169,8 @@ object SystemHelper : Activity() {
                 }
             }
         }
+
+        commonResultListener.onStart()
 
         DownloadHelper.downloadFile(fileUrl, filePath, fileName, isDeleteOriginalFile, object :CommonResultListener<File> {
             override fun onStart(attachParam: Any?) {
@@ -187,9 +208,9 @@ object SystemHelper : Activity() {
     fun installApk(
         activity: Activity?,
         apkFile: File?,
-        explainContent: String = "您必须同意 '应用内安装其他应用' 权限才能完成升级",
-        positiveText: String = "确认",
-        negativeText: String = "取消",
+        explainContent: String? = mDefaultExplainContent,
+        positiveText: String? = mDefaultPositiveText,
+        negativeText: String? = mDefaultNegativeText,
         commonResultListener: CommonResultListener<File>? = null
     ) {
         if (activity == null) {
@@ -223,11 +244,27 @@ object SystemHelper : Activity() {
                 return
             }
 
+            val finllayExplainContent = if (!explainContent.isNullOrEmpty()) {
+                explainContent
+            } else {
+                mDefaultExplainContent
+            }
+            val finllayNegativeText = if (!negativeText.isNullOrEmpty()) {
+                negativeText
+            } else {
+                mDefaultNegativeText
+            }
+            val finallyPositiveText = if (!positiveText.isNullOrEmpty()) {
+                positiveText
+            } else {
+                mDefaultPositiveText
+            }
+
             if (activity is FragmentActivity) {
                 PermissionX.init(activity).permissions(Manifest.permission.REQUEST_INSTALL_PACKAGES)
                     .onExplainRequestReason { scope, deniedlist ->
                         scope.showRequestReasonDialog(
-                            deniedlist, explainContent, positiveText, negativeText)
+                            deniedlist, finllayExplainContent, finallyPositiveText, finllayNegativeText)
                     }
                     .request { allGranted, _, _ ->
                         if (!allGranted) {
@@ -240,9 +277,9 @@ object SystemHelper : Activity() {
                 intoManageUnknownAppPage(
                     activity,
                     apkFile,
-                    explainContent = explainContent,
-                    positiveText = positiveText,
-                    negativeText = negativeText,
+                    explainContent = finllayExplainContent,
+                    positiveText = finallyPositiveText,
+                    negativeText = finllayNegativeText,
                     commonResultListener = commonResultListener
                 )
             }
@@ -276,9 +313,9 @@ object SystemHelper : Activity() {
     private fun intoManageUnknownAppPage(
         activity: Activity,
         apkFile: File? = null,
-        explainContent: String = "您必须同意 '应用内安装其他应用' 权限才能完成升级",
-        positiveText: String = "确认",
-        negativeText: String = "取消",
+        explainContent: String,
+        positiveText: String,
+        negativeText: String,
         commonResultListener: CommonResultListener<File>? = null
     ) {
         //弹出弹窗提示

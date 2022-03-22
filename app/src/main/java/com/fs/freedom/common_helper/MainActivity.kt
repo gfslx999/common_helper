@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
             fileUrl = mFileUrl,
             filePath = mFilePath,
             fileName = mFileName,
+            explainContent = null,
             commonResultListener = object : CommonResultListener<File> {
                 override fun onStart(attachParam: Any?) {
                     if (attachParam is String) {

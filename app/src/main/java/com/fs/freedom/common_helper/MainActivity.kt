@@ -32,13 +32,12 @@ class MainActivity : AppCompatActivity() {
         val btnFirst = findViewById<Button>(R.id.btn_first)
         val btnSecond = findViewById<Button>(R.id.btn_second)
 
-        btnFirst.text = "开始下载"
-        btnSecond.text = "取消下载"
+        btnFirst.text = "进入指定应用市场"
+        btnSecond.text = "打开设置页面"
         btnFirst.setOnClickListener {
-            testDownloadFile()
+            AppHelper.openAppMarket(this, applicationPackageName = "tv.danmaku.bili")
         }
         btnSecond.setOnClickListener {
-            DownloadHelper.cancelDownload(mTag)
         }
 
     }

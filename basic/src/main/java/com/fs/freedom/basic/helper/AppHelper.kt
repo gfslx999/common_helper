@@ -32,25 +32,35 @@ object AppHelper {
 
     /**
      * 进入当前应用-设置-详情页面
+     *
+     * [applicationPackageName] 指定应用包名，如不指定，默认为当前应用
      */
-    fun intoAppSettingDetail(activity: Activity): Boolean {
+    fun openAppSettingDetail(activity: Activity?, applicationPackageName: String = ""): Boolean {
+        if (activity == null) {
+            LogUtil.logE("AppHelper.intoAppSettingDetail: activity is must not be null!")
+            return false
+        }
         return try {
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = Uri.fromParts("package", activity.packageName, null)
+            val packageName = if (applicationPackageName.isNotEmpty()) {
+                applicationPackageName
+            } else {
+                activity.packageName
+            }
+            intent.data = Uri.fromParts("package", packageName, null)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
             true
         } catch (runtimeException: RuntimeException) {
-            if (LogUtil.isCanLog) {
-                runtimeException.printStackTrace()
-            }
+            smartLog { runtimeException.printStackTrace() }
             false
         }
     }
 
     /**
-     * 打开应用市场-当前应用页面
+     * 打开应用市场-指定应用页面
      *
+     * [applicationPackageName] 指定应用包名，如果为空，则默认打开当前应用
      * [targetMarketPackageName] 指定应用市场包名
      * [isOpenSystemMarket] 如 'targetMarketPackageName' 为空，是否打开本机自带应用市场，
      * 为true时，将直接尝试打开当前厂商系统应用商店，否则系统会弹出弹窗自行选择应用市场。
@@ -62,8 +72,9 @@ object AppHelper {
      */
     fun openAppMarket(
         activity: Activity?,
+        applicationPackageName: String = "",
         targetMarketPackageName: String = "",
-        isOpenSystemMarket: Boolean = false
+        isOpenSystemMarket: Boolean = true
     ) : Boolean {
         if (activity == null) {
             LogUtil.logE("openAppMarket: activity is null!")
@@ -77,7 +88,11 @@ object AppHelper {
                 } else if (isOpenSystemMarket) {
                     `package` = getAccordWithPhoneMarketPackage()
                 }
-                data = Uri.parse("market://details?id=${activity.packageName}")
+                data = if (applicationPackageName.isNotEmpty()) {
+                    Uri.parse("market://details?id=$applicationPackageName")
+                } else {
+                    Uri.parse("market://details?id=${activity.packageName}")
+                }
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             activity.startActivity(intent)

@@ -60,6 +60,7 @@ before_script:
 
 # Basic android and gradle stuff
 # Check linting
+#
 lintDebug:
   interruptible: true
   stage: build

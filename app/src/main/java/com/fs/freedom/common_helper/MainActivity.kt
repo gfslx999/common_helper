@@ -1,6 +1,7 @@
 package com.fs.freedom.common_helper
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.fs.freedom.basic.helper.AppHelper
@@ -68,6 +69,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        KeyEvent.KEYCODE_DPAD_CENTER
+        return super.onKeyDown(keyCode, event)
     }
 
 }

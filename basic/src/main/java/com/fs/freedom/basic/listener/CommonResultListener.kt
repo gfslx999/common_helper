@@ -10,10 +10,10 @@ interface CommonResultListener <T> {
     fun onStart(attachParam: Any? = null) {}
 
     //加载成功，回调指定泛型对象
-    fun onSuccess(result: T) {}
+    fun onSuccess(resultData: T) {}
 
     //加载成功，回调指定泛型列表
-    fun onSuccess(result: List<T>) {}
+    fun onSuccess(resultList: List<T>) {}
 
     //加载进度回调
     fun onProgress(currentProgress: Float) {}

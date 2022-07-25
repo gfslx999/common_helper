@@ -1,79 +1,37 @@
 package com.fs.freedom.common_helper
 
 import android.os.Bundle
-import android.view.KeyEvent
+import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.fs.freedom.basic.helper.AppHelper
-import com.fs.freedom.basic.helper.DownloadHelper
 import com.fs.freedom.basic.helper.MediaHelper
-import com.fs.freedom.basic.helper.SystemHelper
 import com.fs.freedom.basic.listener.CommonResultListener
-import com.fs.freedom.basic.model.SystemRingtoneModel
-import com.fs.freedom.basic.util.LogUtil
-import com.fs.freedom.basic.util.ToastUtil
-import com.google.gson.Gson
-import java.io.File
-import kotlin.random.Random
-
+import com.fs.freedom.basic.ui.PickPhotoType
+import com.fs.freedom.basic.ui.TransparentFragment
 
 class MainActivity : AppCompatActivity() {
 
-    private val mFileUrl = "https://hipos.oss-cn-shanghai.aliyuncs.com/hipos-kds-v.5.10.031-g.apk"
-    private val mFileName = "newApk.apk"
-    private val mFilePath by lazy {
-        "${filesDir.path}/updateApk/"
+    companion object {
+        private const val TAG = "MainActivity_"
     }
-    private var mTag: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val btnFirst = findViewById<Button>(R.id.btn_first)
-        val btnSecond = findViewById<Button>(R.id.btn_second)
-
-        btnFirst.text = "进入指定应用市场"
-        btnSecond.text = "打开设置页面"
+        btnFirst.text = "打开图片选择器"
         btnFirst.setOnClickListener {
-            AppHelper.openAppMarket(this, applicationPackageName = "tv.danmaku.bili")
-        }
-        btnSecond.setOnClickListener {
-        }
-
-    }
-
-    private fun testDownloadFile() {
-        SystemHelper.downloadAndInstallApk(
-            this,
-            fileUrl = mFileUrl,
-            filePath = mFilePath,
-            fileName = mFileName,
-            explainContent = null,
-            commonResultListener = object : CommonResultListener<File> {
-                override fun onStart(attachParam: Any?) {
-                    if (attachParam is String) {
-                        mTag = attachParam
-                    }
-                }
-
-                override fun onSuccess(result: File) {
-                    ToastUtil.showToast(this@MainActivity,"跳转安装界面成功")
-                }
-                override fun onProgress(currentProgress: Float) {
-                    LogUtil.logI("currentProgress: $currentProgress")
+            MediaHelper.pickPhoto(this, maxNum = 3, pickType = PickPhotoType.ALL, listener = object : CommonResultListener<String> {
+                override fun onSuccess(resultList: List<String>) {
+                    Log.i(TAG, "onSelectMulti.onSelectMulti: $resultList")
                 }
 
                 override fun onError(message: String) {
-                    ToastUtil.showToast(this@MainActivity, message)
+                    Log.i(TAG, "onError.errorInfo: $message")
                 }
-            }
-        )
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        KeyEvent.KEYCODE_DPAD_CENTER
-        return super.onKeyDown(keyCode, event)
+            })
+        }
     }
 
 }

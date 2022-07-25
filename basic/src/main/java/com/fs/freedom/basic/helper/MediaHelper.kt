@@ -3,9 +3,12 @@ package com.fs.freedom.basic.helper
 import android.content.Context
 import android.media.RingtoneManager
 import android.net.Uri
+import androidx.fragment.app.FragmentActivity
 import com.fs.freedom.basic.helper.internal.SystemRingtoneHelper
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.model.SystemRingtoneModel
+import com.fs.freedom.basic.ui.PickPhotoType
+import com.fs.freedom.basic.ui.TransparentFragment
 
 object MediaHelper {
 
@@ -55,6 +58,22 @@ object MediaHelper {
         commonResultListener: CommonResultListener<SystemRingtoneModel>
     ){
         SystemRingtoneHelper.getSystemRingtoneList(context, ringtoneType, commonResultListener)
+    }
+
+    /**
+     * 选择图片或视频
+     *
+     * [maxNum] 最大选择数
+     * [pickType] 选择类型，参考[PickPhotoType]
+     */
+    fun pickPhoto(
+        activity: FragmentActivity,
+        maxNum: Int = 1,
+        pickType: PickPhotoType = PickPhotoType.ALL,
+        listener: CommonResultListener<String>
+    ) {
+        val transparentFragment = TransparentFragment.getInstanceAndBindSelf(activity)
+        transparentFragment.executePickImage(maxNum, pickType, listener)
     }
 
     /**

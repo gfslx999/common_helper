@@ -3,30 +3,22 @@ package com.fs.freedom.basic.helper
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Dialog
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import android.text.TextUtils
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
-import com.fs.freedom.basic.R
 import com.fs.freedom.basic.constant.CommonConstant
 import com.fs.freedom.basic.expand.smartLog
-import com.fs.freedom.basic.helper.DownloadHelper.cancelDownload
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.util.LogUtil
 import com.permissionx.guolindev.PermissionX
-import com.permissionx.guolindev.callback.RequestCallback
 import com.permissionx.guolindev.dialog.DefaultDialog
 import java.io.File
 import java.lang.IllegalArgumentException
@@ -177,10 +169,10 @@ object SystemHelper : Activity() {
                 commonResultListener.onStart(attachParam)
             }
 
-            override fun onSuccess(result: File) {
+            override fun onSuccess(resultData: File) {
                 installApk(
                     activity,
-                    apkFile = result,
+                    apkFile = resultData,
                     explainContent = explainContent,
                     positiveText = positiveText,
                     negativeText = negativeText,

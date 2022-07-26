@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.fs.freedom.basic.constant.CommonConstant
 import com.fs.freedom.basic.helper.AppHelper
+import com.fs.freedom.basic.helper.FileHelper
 import com.fs.freedom.basic.helper.MediaHelper
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.ui.PickPhotoType

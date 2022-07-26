@@ -15,6 +15,7 @@ object FileHelper {
     /**
      * 将Uri转换为真实路径
      */
+    @Deprecated(message = "Please use PathHelper.transformContentUrlToRealPath", replaceWith = ReplaceWith("Please use PathHelper", "com.fs.freedom.basic.helper.PathHelper.transformContentUrlToRealPath"))
     fun transformUriToRealPath(context: Context?, uri: Uri?) : String {
         if (context == null) {
             LogUtil.logE("transformUriToRealPath: context is null")

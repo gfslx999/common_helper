@@ -33,7 +33,7 @@ internal object SystemRingtoneHelper {
      */
     fun playSystemRingtone(context: Context?, assignUri: Uri? = null): Boolean {
         if (context == null) {
-            LogUtil.logI("playSystemRingtone: Play failed, context is null!")
+            LogUtil.logE("playSystemRingtone: Play failed, context is null!")
             return false
         }
         //防止上一个还没有播放完毕

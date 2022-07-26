@@ -17,11 +17,11 @@ object FileHelper {
      */
     fun transformUriToRealPath(context: Context?, uri: Uri?) : String {
         if (context == null) {
-            LogUtil.logI("transformUriToRealPath: context is null")
+            LogUtil.logE("transformUriToRealPath: context is null")
             return ""
         }
         if (uri == null) {
-            LogUtil.logI("transformUriToRealPath: uri is null")
+            LogUtil.logE("transformUriToRealPath: uri is null")
             return ""
         }
 
@@ -43,12 +43,10 @@ object FileHelper {
         val projection = arrayOf(MediaStore.Images.Media.DATA)
         var cursor: Cursor? = null
         try {
-            LogUtil.logI("getFileRealPathFromApiLessThan19.moveToFirst: ${cursor?.moveToFirst()}")
             cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)
             if (cursor != null && cursor.moveToFirst()) {
                 val columnIndex = cursor.getColumnIndexOrThrow(projection[0])
                 path = cursor.getString(columnIndex)
-                LogUtil.logI("getFileRealPathFromApiLessThan19.columnIndex: $columnIndex, path: $path")
             }
         } catch (e: Exception) {
             cursor?.close()

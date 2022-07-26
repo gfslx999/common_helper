@@ -38,10 +38,10 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
             intent
         } else {
             val intent = Intent(Intent.ACTION_GET_CONTENT)
-            LogUtil.logI("stringPickType: $stringPickType")
             if (stringPickType.isNotEmpty()) {
                 intent.type = stringPickType
             } else {
+                //todo 查找是否有仅选择图片、视频的选项
                 intent.type = "*/*"
             }
             // maxNum 大于1时允许多选
@@ -71,11 +71,10 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
      * 获取真实路径
      */
     private fun getRealPath(intent: Intent?) : List<String> {
-        LogUtil.logI("getRealPath.intent: $intent")
         if (intent?.data != null) {
             val uri = intent.data
             if (uri != null) {
-                return listOf(FileHelper.transformUriToRealPath(activity, uri))
+                return listOf(PathHelper.transformContentUrlToRealPath(activity, uri))
             } else {
                 throw NullPointerException("Uri is null!")
             }
@@ -87,7 +86,6 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
                 val uriList = mutableListOf<String>()
                 while (i < itemCount) {
                     val itemAt = intent!!.clipData!!.getItemAt(i)
-                    LogUtil.logI("itemAt.uri: ${itemAt.uri}")
 
                     uriList.add(PathHelper.transformContentUrlToRealPath(activity, itemAt.uri))
                     i++

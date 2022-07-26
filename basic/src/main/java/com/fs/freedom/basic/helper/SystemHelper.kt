@@ -280,7 +280,7 @@ object SystemHelper : Activity() {
         }
     }
 
-    //test
+    //该方法仅作为测试使用
     @SuppressLint("QueryPermissionsNeeded")
     fun getAllAppNamesAndPackages(activity: Activity?) {
         if (activity == null) {

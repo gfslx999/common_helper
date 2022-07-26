@@ -24,7 +24,8 @@ object FileHelper {
             LogUtil.logI("transformUriToRealPath: uri is null")
             return ""
         }
-        return getFileRealPathFromApiBigger19(context, uri) ?: ""
+
+        return getFileRealPathFromApiBigger19(context, Uri.parse("$uri")) ?: ""
     }
 
     /**
@@ -42,10 +43,12 @@ object FileHelper {
         val projection = arrayOf(MediaStore.Images.Media.DATA)
         var cursor: Cursor? = null
         try {
+            LogUtil.logI("getFileRealPathFromApiLessThan19.moveToFirst: ${cursor?.moveToFirst()}")
             cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)
             if (cursor != null && cursor.moveToFirst()) {
                 val columnIndex = cursor.getColumnIndexOrThrow(projection[0])
                 path = cursor.getString(columnIndex)
+                LogUtil.logI("getFileRealPathFromApiLessThan19.columnIndex: $columnIndex, path: $path")
             }
         } catch (e: Exception) {
             cursor?.close()

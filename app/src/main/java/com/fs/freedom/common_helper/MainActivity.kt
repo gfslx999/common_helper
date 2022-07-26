@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         val btnFirst = findViewById<Button>(R.id.btn_first)
         btnFirst.text = "打开图片选择器"
         btnFirst.setOnClickListener {
-            MediaHelper.pickPhoto(this, maxNum = 3, pickType = PickPhotoType.ALL, listener = object : CommonResultListener<String> {
+            MediaHelper.pickPhoto(this, maxNum = 3, pickType = PickPhotoType.ONLY_IMAGE, listener = object : CommonResultListener<String> {
                 override fun onSuccess(resultList: List<String>) {
                     Log.i(TAG, "onSelectMulti.onSelectMulti: $resultList")
                 }

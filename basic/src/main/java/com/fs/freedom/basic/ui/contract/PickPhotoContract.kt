@@ -7,11 +7,14 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.FragmentActivity
+import com.fs.freedom.basic.constant.CommonConstant
 import com.fs.freedom.basic.expand.smartLog
 import com.fs.freedom.basic.helper.FileHelper
+import com.fs.freedom.basic.helper.PathHelper
 import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.model.PickPhotoModel
 import com.fs.freedom.basic.ui.PickPhotoType
+import com.fs.freedom.basic.util.LogUtil
 import kotlin.RuntimeException
 
 internal class PickPhotoContract(private val activity: FragmentActivity?) : ActivityResultContract<PickPhotoModel, List<String>>() {
@@ -21,20 +24,31 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
 
     override fun createIntent(context: Context, input: PickPhotoModel): Intent {
         mPickPhotoListener = input.pickPhotoListener
+        val stringPickType = transformPickTypeToString(input.pickPhotoType)
+        mMaxNum = input.maxNum
         // Android 13 以上打开图片自带选择器
         return if (Build.VERSION.SDK_INT >= 33) {
             val intent = Intent(MediaStore.ACTION_PICK_IMAGES)
-            val stringPickType = transformPickTypeToString(input.pickPhotoType)
             if (stringPickType.isNotEmpty()) {
                 intent.type = stringPickType
             }
-            mMaxNum = input.maxNum
             if (input.maxNum > 1) {
                 intent.putExtra(MediaStore.EXTRA_PICK_IMAGES_MAX, input.maxNum)
             }
             intent
         } else {
-            Intent()
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            LogUtil.logI("stringPickType: $stringPickType")
+            if (stringPickType.isNotEmpty()) {
+                intent.type = stringPickType
+            } else {
+                intent.type = "*/*"
+            }
+            // maxNum 大于1时允许多选
+            if (input.maxNum > 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            }
+            intent
         }
     }
 
@@ -57,8 +71,9 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
      * 获取真实路径
      */
     private fun getRealPath(intent: Intent?) : List<String> {
-        if (mMaxNum == 1) {
-            val uri = intent?.data
+        LogUtil.logI("getRealPath.intent: $intent")
+        if (intent?.data != null) {
+            val uri = intent.data
             if (uri != null) {
                 return listOf(FileHelper.transformUriToRealPath(activity, uri))
             } else {
@@ -72,8 +87,9 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
                 val uriList = mutableListOf<String>()
                 while (i < itemCount) {
                     val itemAt = intent!!.clipData!!.getItemAt(i)
+                    LogUtil.logI("itemAt.uri: ${itemAt.uri}")
 
-                    uriList.add(FileHelper.transformUriToRealPath(activity, itemAt.uri))
+                    uriList.add(PathHelper.transformContentUrlToRealPath(activity, itemAt.uri))
                     i++
                 }
                 return uriList

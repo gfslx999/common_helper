@@ -14,7 +14,7 @@ import com.fs.freedom.basic.model.PickPhotoModel
 import com.fs.freedom.basic.ui.PickPhotoType
 import kotlin.RuntimeException
 
-class PickPhotoContract(private val activity: FragmentActivity?) : ActivityResultContract<PickPhotoModel, List<String>>() {
+internal class PickPhotoContract(private val activity: FragmentActivity?) : ActivityResultContract<PickPhotoModel, List<String>>() {
 
     private var mMaxNum = 1
     private var mPickPhotoListener: CommonResultListener<String>? = null

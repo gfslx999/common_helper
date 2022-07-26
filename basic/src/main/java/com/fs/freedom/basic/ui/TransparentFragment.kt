@@ -8,7 +8,7 @@ import com.fs.freedom.basic.listener.CommonResultListener
 import com.fs.freedom.basic.model.PickPhotoModel
 import com.fs.freedom.basic.ui.contract.PickPhotoContract
 
-class TransparentFragment : Fragment() {
+internal class TransparentFragment : Fragment() {
 
     companion object {
         /**

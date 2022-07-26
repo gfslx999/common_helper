@@ -22,6 +22,11 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
     private var mMaxNum = 1
     private var mPickPhotoListener: CommonResultListener<String>? = null
 
+    companion object {
+        private const val STRING_ONLY_IMAGE = "image/*"
+        private const val STRING_ONLY_VIDEO = "video/*"
+    }
+
     override fun createIntent(context: Context, input: PickPhotoModel): Intent {
         mPickPhotoListener = input.pickPhotoListener
         val stringPickType = transformPickTypeToString(input.pickPhotoType)
@@ -41,8 +46,11 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
             if (stringPickType.isNotEmpty()) {
                 intent.type = stringPickType
             } else {
-                //todo 查找是否有仅选择图片、视频的选项
-                intent.type = "*/*"
+                //todo 查找是否有仅选择图片、视频的选项 https://stackoverflow.com/questions/31380013/how-to-pick-image-or-video-on-android-l
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    intent.type = "*/*"
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("", ""))
+                }
             }
             // maxNum 大于1时允许多选
             if (input.maxNum > 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -99,9 +107,16 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
 
     private fun transformPickTypeToString(pickType: PickPhotoType) : String {
         return when (pickType) {
-            PickPhotoType.ONLY_IMAGE -> "image/*"
-            PickPhotoType.ONLY_VIDEO -> "video/*"
+            PickPhotoType.ONLY_IMAGE -> STRING_ONLY_IMAGE
+            PickPhotoType.ONLY_VIDEO -> STRING_ONLY_VIDEO
             PickPhotoType.ALL -> ""
+//            PickPhotoType.ALL -> {
+//                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                    ""
+//                } else {
+//
+//                }
+//            }
         }
     }
 

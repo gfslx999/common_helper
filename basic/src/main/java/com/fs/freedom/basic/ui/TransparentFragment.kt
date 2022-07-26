@@ -44,10 +44,7 @@ internal class TransparentFragment : Fragment() {
      * 注册所有的 [ActivityResultLauncher]
      */
     private fun registerAllLauncher() {
-        mPickPhotoLauncher = registerForActivityResult(PickPhotoContract(activity)) {
-
-        }
-
+        mPickPhotoLauncher = registerForActivityResult(PickPhotoContract(activity)) {}
         // Android 13及以上直接使用图片选择器，无需获取权限
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             mPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isAgreed ->

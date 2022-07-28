@@ -45,11 +45,9 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             if (stringPickType.isNotEmpty()) {
                 intent.type = stringPickType
-            } else {
-                //todo 查找是否有仅选择图片、视频的选项 https://stackoverflow.com/questions/31380013/how-to-pick-image-or-video-on-android-l
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    intent.type = "*/*"
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("", ""))
+                //todo 验证是否可以仅选择图片、视频
+                if (input.pickPhotoType == PickPhotoType.ALL && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(STRING_ONLY_IMAGE, STRING_ONLY_VIDEO))
                 }
             }
             // maxNum 大于1时允许多选
@@ -109,14 +107,13 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
         return when (pickType) {
             PickPhotoType.ONLY_IMAGE -> STRING_ONLY_IMAGE
             PickPhotoType.ONLY_VIDEO -> STRING_ONLY_VIDEO
-            PickPhotoType.ALL -> ""
-//            PickPhotoType.ALL -> {
-//                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                    ""
-//                } else {
-//
-//                }
-//            }
+            PickPhotoType.ALL -> {
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ""
+                } else {
+                    "*/*"
+                }
+            }
         }
     }
 

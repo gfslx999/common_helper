@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         val tvPhotoList = findViewById<TextView>(R.id.tv_photo_list)
         btnFirst.text = "打开图片选择器"
         btnFirst.setOnClickListener {
-            MediaHelper.pickPhoto(this, maxNum = 3, pickType = PickPhotoType.ONLY_IMAGE, listener = object : CommonResultListener<String> {
+            MediaHelper.pickPhoto(this, maxNum = 1, pickType = PickPhotoType.ALL, listener = object : CommonResultListener<String> {
                 override fun onSuccess(resultList: List<String>) {
                     val stringBuilder = StringBuilder()
                     for (s in resultList) {

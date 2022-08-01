@@ -32,7 +32,7 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
         val stringPickType = transformPickTypeToString(input.pickPhotoType)
         mMaxNum = input.maxNum
         // Android 13 以上打开图片自带选择器
-        return if (Build.VERSION.SDK_INT >= 33) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val intent = Intent(MediaStore.ACTION_PICK_IMAGES)
             if (stringPickType.isNotEmpty()) {
                 intent.type = stringPickType
@@ -43,12 +43,10 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
             intent
         } else {
             val intent = Intent(Intent.ACTION_GET_CONTENT)
-            if (stringPickType.isNotEmpty()) {
-                intent.type = stringPickType
-                //todo 验证是否可以仅选择图片、视频
-                if (input.pickPhotoType == PickPhotoType.ALL && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(STRING_ONLY_IMAGE, STRING_ONLY_VIDEO))
-                }
+            intent.type = stringPickType
+            if (input.pickPhotoType == PickPhotoType.ALL && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                // 仅选择图片和视频
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(STRING_ONLY_IMAGE, STRING_ONLY_VIDEO))
             }
             // maxNum 大于1时允许多选
             if (input.maxNum > 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -103,6 +101,9 @@ internal class PickPhotoContract(private val activity: FragmentActivity?) : Acti
         }
     }
 
+    /**
+     * 将选择类型转换为字符串类型
+     */
     private fun transformPickTypeToString(pickType: PickPhotoType) : String {
         return when (pickType) {
             PickPhotoType.ONLY_IMAGE -> STRING_ONLY_IMAGE

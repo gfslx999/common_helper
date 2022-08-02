@@ -66,10 +66,11 @@ object MediaHelper {
      * 选择图片或视频
      *
      * Android 13以下的版本，需要申请 [Manifest.permission.READ_EXTERNAL_STORAGE] 才可以获取真实路径
-     * [maxNum] 最大选择数
+     * [maxNum] 最大选择数，仅在 Android 13上生效，Android 13以下仅能控制是否多选，无法控制具体数量
      * [pickType] 选择类型，参考[PickPhotoType]
      * [isRequestPermissionSelf] Android 13 以下，如果没有 READ_EXTERNAL_STORAGE 权限，是否自动申请
      * [listener] 成功时回调 'onSuccess(resultList: List<T>)'
+     *
      * 错误处理：
      * 1. onError 回调 [CommonConstant.ERROR_USER_DENIED_PERMISSION] 时代表自动申请了权限，但是用户拒绝了权限
      * 2. onError 回调 [CommonConstant.ERROR_PERMISSION_IS_DENIED] 时，代表[isRequestPermissionSelf] 为false，并且权限状态为拒绝，
